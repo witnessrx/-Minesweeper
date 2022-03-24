@@ -299,6 +299,7 @@ function resetTable() {
     var elBtn = document.querySelectorAll('button')
     for (var btn of elBtn)
         btn.style.color = '#e3e1f5'
+    hint.classList.remove('activate-hint')
     hint.innerText = 'Hint: ' + gGame.hint
     elGameOver.innerText = ''
     var elSmile = document.querySelector('.smile')
@@ -355,7 +356,6 @@ function hintActivate() {
 //render hiden cells
 function hintRender(rowIdx, colIdx) {
     var hint = document.querySelector('.game-hint')
-    hint.classList.remove('activate-hint')
     hint.innerText = 'Hint: ' + gGame.hint
 
     var idxHint = []
@@ -380,6 +380,8 @@ function hintRender(rowIdx, colIdx) {
         }
         renderBoard(gBoard)
         gGame.hintStatus = false
+        hint.classList.remove('activate-hint')
+
     }, 1000);
 }
 
