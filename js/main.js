@@ -9,7 +9,8 @@ var gGame = {
     isOn: true,
     shownCount: 0,
     markedCount: 0,
-    lives: 3
+    lives: 3,
+    hint:3
 }
 var gStartTime = 0
 var gIntervalID
@@ -56,7 +57,8 @@ function buildBoard() {
                 minesAroundCount: '',
                 isShown: false,
                 isMine: false,
-                isMarked: false
+                isMarked: false,
+                isHinted: false
             }
             mat[i][j] = cell
         }
@@ -83,6 +85,7 @@ function renderBoard(board) {
                 className = 'mine'
                 cell.minesAroundCount = '💣'
             }
+            if(cell.isHinted) className = 'hint'
             if (!cell.isMine && cell.isShown && !cell.isMarked) className = 'reg'
             if (cell.minesAroundCount === 0 && !cell.isMine && !cell.isMarked) cell.minesAroundCount = ''
             if (cell.isMarked) {
@@ -137,17 +140,14 @@ function countMinesAround(mat, rowIdx, colIdx) {
             if (cell.isMine) {
                 minesCount++
             }
-            // if (!cell.isMine ) {
-            //     cell.isShown = true
-            // }
-
+        
         }
     }
 
     return minesCount
 }
 
-function renderNeighboors(mat, rowIdx, colIdx) {
+function expandShown(mat, rowIdx, colIdx) {
     for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
         if (i < 0 || i > mat.length - 1) continue
 
@@ -155,14 +155,14 @@ function renderNeighboors(mat, rowIdx, colIdx) {
             if (j < 0 || j > mat[0].length - 1) continue
             if (i === rowIdx && j === colIdx) continue
             var cell = mat[i][j]
-          cell.isShown=true
-          cell.minesAroundCount = countMinesAround(mat,i,j)
+            cell.isShown = true
+            cell.minesAroundCount = countMinesAround(mat, i, j)
 
 
         }
     }
 }
-
+///////////////////
 function cellClicked(elCell, i, j) {
     if (!gGame.isOn) return
     clickCount++
@@ -177,13 +177,13 @@ function cellClicked(elCell, i, j) {
         gGame.lives--
 
     }
-if(!cell.isMine){
-    mines = countMinesAround(gBoard, i, j)
-    cell.minesAroundCount = mines
-}
-if(cell.minesAroundCount===0){
-    renderNeighboors(gBoard,i,j)
-}
+    if (!cell.isMine) {
+        mines = countMinesAround(gBoard, i, j)
+        cell.minesAroundCount = mines
+    }
+    if (cell.minesAroundCount === 0) {
+        expandShown(gBoard, i, j)
+    }
     renderBoard(gBoard)
     checkGameOver()
 
@@ -205,7 +205,7 @@ function cellMarked(elCell, i, j) {
         cell.isMarked = true
         gGame.markedCount++
     }
-        renderBoard(gBoard)
+    renderBoard(gBoard)
 }
 
 
@@ -238,9 +238,6 @@ function checkGameOver() {
 
 }
 
-function expandShown(board, elCell, i, j) {
-
-}
 
 
 
@@ -252,7 +249,9 @@ function renderStats() {
     elShownCount.innerText = 'Shown Count: ' + gGame.shownCount + '/' + `${gLevel.SIZE * gLevel.SIZE - gLevel.MINES}`
     var elMarkedCount = document.querySelector('.marked')
     elMarkedCount.innerText = ' Marked Count: ' + gGame.markedCount
-}elL
+    var hint = document.querySelector('.game-hint')
+    hint.innerText = 'Hint Left: '+ gGame.hint
+} 
 
 function pad(val) {
     var valString = val + '';
@@ -282,7 +281,8 @@ function resetTable() {
         isOn: true,
         shownCount: 0,
         markedCount: 0,
-        lives: 3
+        lives: 3,
+        hint:3
     }
     clearInterval(gIntervalID)
     clickCount = 0
@@ -290,10 +290,10 @@ function resetTable() {
     var elGameOver = document.querySelector('.game-over')
     var elBtn = document.querySelectorAll('button')
     for (var btn of elBtn)
-        btn.style.color = 'white'
-        elGameOver.innerText = ''
-        var elSmile = document.querySelector('.smile')
-        elSmile.innerText = '🙄'
+        btn.style.color = '#e3e1f5'
+    elGameOver.innerText = ''
+    var elSmile = document.querySelector('.smile')
+    elSmile.innerText = '🙄'
 
     var elMinutes = document.querySelector('.minutes');
     var elSeconds = document.querySelector('.seconds');
@@ -307,3 +307,27 @@ function resetTable() {
 /////////////////
 ///////////////
 /////////////
+function hint(){
+    if(gGame.hint===0) return
+    gGame.hint--
+    var hintIdx=[]
+    for(var i=0;i<gBoard.length;i++){
+        for(j=0;j<gBoard[0].length;j++){
+            var cell = gBoard[i][j]
+            if(!cell.isMine && !cell.isMarked && !cell.isShown){
+              hintIdx.push({i,j})
+            }
+        }
+    }
+   var randomHint = getRandomInt(0, hintIdx.length)
+var I = hintIdx[randomHint].i
+var J = hintIdx[randomHint].j
+
+console.log(gBoard[I][J])
+gBoard[I][J].isHinted=true
+renderBoard(gBoard)
+setTimeout(()=>{
+    gBoard[I][J].isHinted=false
+    renderBoard(gBoard)
+},1000)
+}

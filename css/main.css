@@ -42,7 +42,7 @@ button{
     width: 100px;
     font-weight: 700;
     background-color: rgb(26, 39, 109);
-    color: white;
+    color: #e3e1f5;
     cursor: pointer;
     transition: 0.2s;
 }
@@ -82,4 +82,12 @@ color: rgb(5, 87, 55);
 
 .name{
     color: rgb(79, 81, 82);
+}
+.hint{
+    background-color: rgb(37, 223, 46);
+}
+
+.game-hint{
+    background-color: rgb(14, 165, 47);
+    color: #e3e1f5;
 }
