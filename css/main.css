@@ -85,11 +85,21 @@ color: rgb(5, 87, 55);
 .name{
     color: rgb(79, 81, 82);
 }
-.hint{
+.safe{
     background-color: rgb(37, 223, 46);
 }
 
-.game-hint{
+.safe-clickBtn{
     background-color: rgb(14, 165, 47);
     color: #e3e1f5;
+    width: 120px;
+}
+
+.game-hint{
+background-color: rgb(211, 119, 14);
+}
+
+
+.activate-hint{
+background-color: rgb(243, 228, 23);
 }

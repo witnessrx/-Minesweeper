@@ -10,7 +10,9 @@ var gGame = {
     shownCount: 0,
     markedCount: 0,
     lives: 3,
-    hint: 3
+    safeClick: 3,
+    hint: 3,
+    hintStatus: false
 }
 var gStartTime = 0
 var gIntervalID
@@ -62,7 +64,8 @@ function buildBoard() {
                 isShown: false,
                 isMine: false,
                 isMarked: false,
-                isHinted: false
+                isSafe: false,
+                isHint: false
             }
             mat[i][j] = cell
         }
@@ -88,7 +91,7 @@ function renderBoard(board) {
                 className = 'mine'
                 cell.minesAroundCount = '💣'
             }
-            if (cell.isHinted) className = 'hint'
+            if (cell.isSafe) className = 'safe'
             if (!cell.isMine && cell.isShown && !cell.isMarked) className = 'reg'
             if (cell.minesAroundCount === 0 && !cell.isMine && !cell.isMarked) cell.minesAroundCount = ''
             if (cell.isMarked) {
@@ -170,6 +173,11 @@ function cellClicked(elCell, i, j) {
         setMinesNegsCount(i, j)
         startTimer()
     }
+    if (gGame.hintStatus) {
+        hintRender(i, j)
+        return
+    }
+
     if (cell.isMarked || cell.isShown) return
     cell.isShown = true
     if (cell.isShown && cell.isMine) {
@@ -183,6 +191,7 @@ function cellClicked(elCell, i, j) {
     if (cell.minesAroundCount === 0) {
         expandShown(gBoard, i, j)
     }
+
     renderBoard(gBoard)
     checkGameOver()
 
@@ -249,8 +258,8 @@ function renderStats() {
     elShownCount.innerText = 'Shown Count: ' + gGame.shownCount + '/' + `${gLevel.SIZE * gLevel.SIZE - gLevel.MINES}`
     var elMarkedCount = document.querySelector('.marked')
     elMarkedCount.innerText = ' Marked Count: ' + gGame.markedCount
-    var hint = document.querySelector('.game-hint')
-    hint.innerText = 'Hint Left: ' + gGame.hint
+    var safeBtn = document.querySelector('.safe-clickBtn')
+    safeBtn.innerText = 'Safe Click: ' + gGame.safeClick
 }
 
 
@@ -278,15 +287,19 @@ function resetTable() {
         shownCount: 0,
         markedCount: 0,
         lives: 3,
-        hint: 3
+        safeClick: 3,
+        hint: 3,
+        hintStatus: false
     }
     clearInterval(gIntervalID)
     clickCount = 0
     gStartTime = 0
+    var hint = document.querySelector('.game-hint')
     var elGameOver = document.querySelector('.game-over')
     var elBtn = document.querySelectorAll('button')
     for (var btn of elBtn)
         btn.style.color = '#e3e1f5'
+    hint.innerText = 'Hint: ' + gGame.hint
     elGameOver.innerText = ''
     var elSmile = document.querySelector('.smile')
     elSmile.innerText = '🙄'
@@ -302,29 +315,71 @@ function resetTable() {
 }
 
 
-//Hint button
-function hint() {
-    if (gGame.hint === 0) return
-    gGame.hint--
-    var hintIdx = []
+//Safe Click button
+function safeClick() {
+    if (gGame.safeClick === 0) return
+    gGame.safeClick--
+    var safeClickCords = []
     for (var i = 0; i < gBoard.length; i++) {
         for (j = 0; j < gBoard[0].length; j++) {
             var cell = gBoard[i][j]
-            if (!cell.isMine &&  !cell.isShown) {
-                hintIdx.push({ i, j })
+            if (!cell.isMine && !cell.isShown) {
+                safeClickCords.push({ i, j })
             }
         }
     }
-    var randomHint = getRandomInt(0, hintIdx.length)
-    var I = hintIdx[randomHint].i
-    var J = hintIdx[randomHint].j
+    var randomIdx = getRandomInt(0, safeClickCords.length)
+    var I = safeClickCords[randomIdx].i
+    var J = safeClickCords[randomIdx].j
 
-    console.log(gBoard[I][J])
-    gBoard[I][J].isHinted = true
+    gBoard[I][J].isSafe = true
     renderBoard(gBoard)
     setTimeout(() => {
-        gBoard[I][J].isHinted = false
+        gBoard[I][J].isSafe = false
         renderBoard(gBoard)
     }, 1000)
+}
+
+//active button
+function hintActivate() {
+    if (gGame.hint === 0 || gGame.hintStatus) return
+    gGame.hintStatus = true
+    gGame.hint--
+    var hint = document.querySelector('.game-hint')
+    hint.classList.add('activate-hint')
+    hint.innerText = '💡'
+}
+
+
+
+//render hiden cells
+function hintRender(rowIdx, colIdx) {
+    var hint = document.querySelector('.game-hint')
+    hint.classList.remove('activate-hint')
+    hint.innerText = 'Hint: ' + gGame.hint
+
+    var idxHint = []
+    for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
+        for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
+            if (i < 0 || i > gBoard.length - 1) continue
+            for (var j = colIdx - 1; j <= colIdx + 1; j++) {
+                if (j < 0 || j > gBoard[0].length - 1) continue
+                var cell = gBoard[i][j]
+                if (!cell.isShown) {
+                    cell.isShown = true
+                    idxHint.push({ i, j })
+                }
+            }
+        }
+    }
+    renderBoard(gBoard)
+
+    setTimeout(() => {
+        for (var i = 0; i < idxHint.length; i++) {
+            gBoard[idxHint[i].i][idxHint[i].j].isShown = false
+        }
+        renderBoard(gBoard)
+        gGame.hintStatus = false
+    }, 1000);
 }
 
