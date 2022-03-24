@@ -137,14 +137,30 @@ function countMinesAround(mat, rowIdx, colIdx) {
             if (cell.isMine) {
                 minesCount++
             }
-            if (!cell.isMine ) {
-                cell.isShown = true
-            }
+            // if (!cell.isMine ) {
+            //     cell.isShown = true
+            // }
 
         }
     }
 
     return minesCount
+}
+
+function renderNeighboors(mat, rowIdx, colIdx) {
+    for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
+        if (i < 0 || i > mat.length - 1) continue
+
+        for (var j = colIdx - 1; j <= colIdx + 1; j++) {
+            if (j < 0 || j > mat[0].length - 1) continue
+            if (i === rowIdx && j === colIdx) continue
+            var cell = mat[i][j]
+          cell.isShown=true
+          cell.minesAroundCount = countMinesAround(mat,i,j)
+
+
+        }
+    }
 }
 
 function cellClicked(elCell, i, j) {
@@ -164,6 +180,9 @@ function cellClicked(elCell, i, j) {
 if(!cell.isMine){
     mines = countMinesAround(gBoard, i, j)
     cell.minesAroundCount = mines
+}
+if(cell.minesAroundCount===0){
+    renderNeighboors(gBoard,i,j)
 }
     renderBoard(gBoard)
     checkGameOver()
@@ -191,12 +210,12 @@ function cellMarked(elCell, i, j) {
 
 
 function checkGameOver() {
-    var gameOver = document.querySelector('.game-over')
-    var smile = document.querySelector('.smile')
+    var elGameOver = document.querySelector('.game-over')
+    var elSmile = document.querySelector('.smile')
     if (gGame.lives === 0) {
         gGame.isOn = false
-        gameOver.innerHTML = '<h2 style="color:brown">You Lost</h2>'
-        smile.innerText = '😫'
+        elGameOver.innerHTML = '<h2 style="color:brown">You Lost</h2>'
+        elSmile.innerText = '😫'
         clearInterval(gIntervalID)
 
     }
@@ -206,8 +225,8 @@ function checkGameOver() {
             if (gGame.shownCount === gLevel.SIZE * gLevel.SIZE - gLevel.MINES) {
                 if (cell.isMine) cell.isMarked = true
                 gGame.markedCount = gLevel.MINES
-                gameOver.innerHTML = '<h2 style="color:green">You win!</h2>'
-                smile.innerText = '🤩'
+                elGameOver.innerHTML = '<h2 style="color:green">You win!</h2>'
+                elSmile.innerText = '🤩'
 
                 gGame.isOn = false
                 clearInterval(gIntervalID)
@@ -227,14 +246,13 @@ function expandShown(board, elCell, i, j) {
 
 
 function renderStats() {
-    var lives = document.querySelector('.lives')
-    lives.innerText = 'Lives: ' + gGame.lives
-    var shownCount = document.querySelector('.count')
-    shownCount.innerText = 'Shown Count: ' + gGame.shownCount + '/' + `${gLevel.SIZE * gLevel.SIZE - gLevel.MINES}`
-    var markedCount = document.querySelector('.marked')
-    markedCount.innerText = ' Marked Count: ' + gGame.markedCount
-}
-
+    var elLives = document.querySelector('.lives')
+    elLives.innerText = 'Lives: ' + gGame.lives
+    var elShownCount = document.querySelector('.count')
+    elShownCount.innerText = 'Shown Count: ' + gGame.shownCount + '/' + `${gLevel.SIZE * gLevel.SIZE - gLevel.MINES}`
+    var elMarkedCount = document.querySelector('.marked')
+    elMarkedCount.innerText = ' Marked Count: ' + gGame.markedCount
+}elL
 
 function pad(val) {
     var valString = val + '';
@@ -269,13 +287,13 @@ function resetTable() {
     clearInterval(gIntervalID)
     clickCount = 0
     gStartTime = 0
-    var gameOver = document.querySelector('.game-over')
+    var elGameOver = document.querySelector('.game-over')
     var elBtn = document.querySelectorAll('button')
     for (var btn of elBtn)
         btn.style.color = 'white'
-        gameOver.innerText = ''
-        var smile = document.querySelector('.smile')
-        smile.innerText = '🙄'
+        elGameOver.innerText = ''
+        var elSmile = document.querySelector('.smile')
+        elSmile.innerText = '🙄'
 
     var elMinutes = document.querySelector('.minutes');
     var elSeconds = document.querySelector('.seconds');
@@ -286,3 +304,6 @@ function resetTable() {
     initGame()
 
 }
+/////////////////
+///////////////
+/////////////
