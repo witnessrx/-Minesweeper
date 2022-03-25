@@ -91,7 +91,7 @@ color: rgb(5, 87, 55);
 
 .safe-clickBtn{
     background-color: rgb(14, 165, 47);
-    color: #e3e1f5;
+    color: #f3e1f5;
     width: 120px;
 }
 
@@ -102,4 +102,17 @@ background-color: rgb(211, 119, 14);
 
 .activate-hint{
 background-color: rgb(243, 228, 23);
+}
+
+
+.manually{
+    background-color: #91488e;
+    width: 120px;
+}
+
+.set-play{
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    background-color: #dbd24a;
+    transform: scale(1.2);
+    
 }

@@ -1,5 +1,4 @@
-
-var gBoard
+var previousValue;
 var gLevel = {
     SIZE: 4,
     MINES: 3
@@ -12,11 +11,16 @@ var gGame = {
     lives: 3,
     safeClick: 3,
     hint: 3,
-    hintStatus: false
+    hintStatus: false,
+    manually: false
 }
+
+var gBoard
 var gStartTime = 0
 var gIntervalID
 var clickCount = 0
+var manuallMinesSet = 0
+var gameOver = false
 
 
 
@@ -44,7 +48,7 @@ function levelGame(elBtn) {
     }
     if (elBtn.innerText === 'Hard(12x12)') {
         gLevel.SIZE = 12
-        gLevel.MINES = 12
+        gLevel.MINES = 30
         resetTable()
         elBtn.style.color = '#dbd24a'
         initGame()
@@ -72,6 +76,7 @@ function buildBoard() {
     }
     return mat
 }
+
 
 //render
 function renderBoard(board) {
@@ -104,7 +109,6 @@ function renderBoard(board) {
             }
             strHTML += `<td class ="cell-${i}-${j} ${className}"oncontextmenu="cellMarked(this, ${i},${j})" onclick="cellClicked(this, ${i},${j})">${cell.minesAroundCount}</td>`
         }
-
         strHTML += '</tr>'
     }
     var elCell = document.querySelector('.board-container')
@@ -114,8 +118,9 @@ function renderBoard(board) {
 
 
 
-
+//set mines in a random cell
 function setMinesNegsCount(clickI, clickJ) {
+    if (gGame.manually) return
     var minesCount = 0
     while (minesCount !== gLevel.MINES) {
         var I = getRandomInt(0, gBoard.length)
@@ -125,10 +130,25 @@ function setMinesNegsCount(clickI, clickJ) {
         gBoard[I][J].isMine = true
         minesCount++
     }
-
-
 }
 
+//set mines manually
+function setMinesManually(clickI, clickJ) {
+    var elManualBtn = document.querySelector('.manually')
+    if (gGame.manually && !gameOver && !gBoard[clickI][clickJ].isMine) {
+        if (manuallMinesSet < gLevel.MINES) {
+            gBoard[clickI][clickJ].isMine = true
+            gBoard[clickI][clickJ].isShown = true
+            manuallMinesSet++
+            renderBoard(gBoard)
+        }
+        if (manuallMinesSet === gLevel.MINES && !gameOver) {
+            elManualBtn.classList.add('set-play')
+            elManualBtn.innerText = 'Press Play'
+            elManualBtn.style.color = '#3752cc'
+        }
+    }
+ }
 
 
 // CountNeighbors
@@ -136,7 +156,6 @@ function countMinesAround(mat, rowIdx, colIdx) {
     var minesCount = 0
     for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
         if (i < 0 || i > mat.length - 1) continue
-
         for (var j = colIdx - 1; j <= colIdx + 1; j++) {
             if (j < 0 || j > mat[0].length - 1) continue
             if (i === rowIdx && j === colIdx) continue
@@ -166,7 +185,10 @@ function expandShown(mat, rowIdx, colIdx) {
 
 //Left click
 function cellClicked(elCell, i, j) {
-    if (!gGame.isOn) return
+    if (!gGame.isOn) {
+        setMinesManually(i, j)
+        return
+    }
     clickCount++
     var cell = gBoard[i][j]
     if (clickCount === 1) {
@@ -177,12 +199,10 @@ function cellClicked(elCell, i, j) {
         hintRender(i, j)
         return
     }
-
     if (cell.isMarked || cell.isShown) return
     cell.isShown = true
     if (cell.isShown && cell.isMine) {
         gGame.lives--
-
     }
     if (!cell.isMine) {
         mines = countMinesAround(gBoard, i, j)
@@ -191,10 +211,9 @@ function cellClicked(elCell, i, j) {
     if (cell.minesAroundCount === 0) {
         expandShown(gBoard, i, j)
     }
-
     renderBoard(gBoard)
     checkGameOver()
-
+    checkBtn()
 
 }
 
@@ -218,16 +237,20 @@ function cellMarked(elCell, i, j) {
     renderBoard(gBoard)
 }
 
+
 //win / lose
 function checkGameOver() {
     var elGameOver = document.querySelector('.game-over')
     var elSmile = document.querySelector('.smile')
     if (gGame.lives === 0) {
         gGame.isOn = false
+        gameOver = true
+        manuallMinesSet = 0
         elGameOver.innerHTML = '<h2 style="color:brown">You Lost</h2>'
         elSmile.innerText = '😫'
         clearInterval(gIntervalID)
-    }
+       }
+
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard[0].length; j++) {
             var cell = gBoard[i][j]
@@ -236,17 +259,32 @@ function checkGameOver() {
                 gGame.markedCount = gLevel.MINES
                 elGameOver.innerHTML = '<h2 style="color:green">You win!</h2>'
                 elSmile.innerText = '🤩'
-
                 gGame.isOn = false
+                gameOver = true
+                manuallMinesSet = 0
                 clearInterval(gIntervalID)
+                var sec = document.querySelector('.seconds')
+                var miliseconds = document.querySelector('.miliseconds')
+                var minutes = document.querySelector('.minutes')
+                var currTime = `${minutes.innerText}:${sec.innerText}:${miliseconds.innerText}`
+                localStorage.setItem('cuurTime', currTime)
+                bestTime()
                 renderBoard(gBoard)
             }
         }
 
     }
 
+
 }
 
+//update best time from local storage
+function bestTime() {
+    var bestTime = document.querySelector('.best-time')
+    if (localStorage.getItem('cuurTime') < bestTime.innerText) {
+        bestTime.innerText = 'Best Time: ' + localStorage.getItem('cuurTime')
+    }
+}
 
 
 
@@ -280,6 +318,7 @@ function startTimer() {
 
 
 
+
 //reset game
 function resetTable() {
     gGame = {
@@ -289,14 +328,18 @@ function resetTable() {
         lives: 3,
         safeClick: 3,
         hint: 3,
-        hintStatus: false
+        hintStatus: false,
+        manually: false
     }
+    gameOver=false
     clearInterval(gIntervalID)
     clickCount = 0
     gStartTime = 0
+    manuallMinesSet =0
     var hint = document.querySelector('.game-hint')
     var elGameOver = document.querySelector('.game-over')
     var elBtn = document.querySelectorAll('button')
+    var elManualBtn = document.querySelector('.manually')
     for (var btn of elBtn)
         btn.style.color = '#e3e1f5'
     hint.classList.remove('activate-hint')
@@ -304,7 +347,8 @@ function resetTable() {
     elGameOver.innerText = ''
     var elSmile = document.querySelector('.smile')
     elSmile.innerText = '🙄'
-
+    elManualBtn.innerText = 'Set Manually'
+    elManualBtn.classList.remove('set-play')
     var elMinutes = document.querySelector('.minutes');
     var elSeconds = document.querySelector('.seconds');
     var elmilliSeconds = document.querySelector('.miliseconds');
@@ -312,7 +356,6 @@ function resetTable() {
     elSeconds.innerText = '00'
     elMinutes.innerText = '00'
     initGame()
-
 }
 
 
@@ -385,3 +428,39 @@ function hintRender(rowIdx, colIdx) {
     }, 1000);
 }
 
+
+
+
+// manually button activate
+function manuallyPos() {
+    var elManualBtn = document.querySelector('.manually')
+    if (gGame.isOn && gGame.manually === false && clickCount===0) {
+               gGame.isOn = false
+        gGame.manually = true
+        elManualBtn.innerText = 'Set ' + gLevel.MINES + ' mines'
+        elManualBtn.style.color = '#dbd24a'
+    } 
+    if (manuallMinesSet === gLevel.MINES){
+        gGame.isOn = true
+        for (var i = 0; i < gBoard.length; i++) {
+            for (var j = 0; j < gBoard[0].length; j++) {
+                var cell = gBoard[i][j]
+                cell.isShown = false
+                renderBoard(gBoard)
+            }
+        }
+              elManualBtn.classList.remove('set-play')
+        elManualBtn.innerText = gLevel.MINES + ' Mines Activated'
+        elManualBtn.style.color = '#dbd24a'
+    }
+}
+
+
+
+
+function checkBtn(){
+    var elManualBtn = document.querySelector('.manually')
+    if(clickCount > 0){
+        elManualBtn.innerText = 'Not Allowed'
+    }
+}
