@@ -1,0 +1,118 @@
+*{
+    box-sizing: border-box;
+}
+body{
+    height: 100%;
+text-align: center;
+background-image: url('../img/1.jpg');
+background-repeat: no-repeat;
+background-size: cover;
+}
+div{
+    margin-top: 20px;
+}
+table{
+   background-color: aliceblue;
+    margin: auto;
+    border: 3px solid rgb(32, 15, 95);
+}
+
+td{
+    font-weight: 600;
+    text-align: center;
+  height: 50px;
+  width: 50px;
+    border: 1px solid black;
+    cursor: pointer;
+    
+}
+
+
+.mine{
+    background-color: brown;
+}
+
+.reg{
+    background-color: rgb(188, 196, 196);
+}
+
+
+button{
+    border-radius: 15%;
+    padding: 10px;
+    width: 100px;
+    font-weight: 700;
+    background-color: rgb(66, 87, 204);
+    color: #e3e1f5;
+    cursor: pointer;
+    transition: 0.2s;
+    margin: 1%;
+}
+button:hover{
+    transform: scale(1.1);
+}
+
+.smile{
+    border-radius: 50%;
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    font-size: 30px;
+    cursor: pointer;
+    transition: 0.2s;
+    
+    }
+    .smile:hover{
+        transform: scale(1.3);
+    }
+
+
+.first{
+color: #dbd24a
+
+}
+.count, .marked{
+    display: inline-block;
+margin-left: 10%;
+margin-right: 10%;
+color: rgb(5, 87, 55);
+}
+
+.lives{
+    color: rgb(202, 29, 52);
+}
+
+.name{
+    color: rgb(79, 81, 82);
+}
+.safe{
+    background-color: rgb(37, 223, 46);
+}
+
+.safe-clickBtn{
+    background-color: rgb(14, 165, 47);
+    color: #f3e1f5;
+    width: 120px;
+}
+
+.game-hint{
+background-color: rgb(211, 119, 14);
+}
+
+
+.activate-hint{
+background-color: rgb(243, 228, 23);
+}
+
+
+.manually{
+    background-color: #91488e;
+    width: 120px;
+}
+
+.set-play{
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    background-color: #dbd24a;
+    transform: scale(1.2);
+    
+}
