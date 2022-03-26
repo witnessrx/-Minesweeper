@@ -113,7 +113,9 @@ function renderBoard(board) {
     }
     var elCell = document.querySelector('.board-container')
     elCell.innerHTML = strHTML
+    setNeighbors()
     renderStats()
+
 }
 
 
@@ -148,10 +150,10 @@ function setMinesManually(clickI, clickJ) {
             elManualBtn.style.color = '#3752cc'
         }
     }
- }
+}
 
 
-// CountNeighbors
+// Count mines around
 function countMinesAround(mat, rowIdx, colIdx) {
     var minesCount = 0
     for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
@@ -169,19 +171,38 @@ function countMinesAround(mat, rowIdx, colIdx) {
 }
 
 
+//set nums to Neighbors
+function setNeighbors() {
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard[0].length; j++) {
+            gBoard[i][j].minesAroundCount = countMinesAround(gBoard, i, j)
+        }
+    }
+}
+
 //expand empty cells
 function expandShown(mat, rowIdx, colIdx) {
     for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
         if (i < 0 || i > mat.length - 1) continue
         for (var j = colIdx - 1; j <= colIdx + 1; j++) {
             if (j < 0 || j > mat[0].length - 1) continue
-            if (i === rowIdx && j === colIdx) continue
             var cell = mat[i][j]
-            cell.isShown = true
-            cell.minesAroundCount = countMinesAround(mat, i, j)
+
+            if (!mat[i][j].isMine && !cell.isShown) {
+                cell.isShown = true
+                
+                if (mat[i][j].minesAroundCount === 0) {
+                    expandShown(gBoard, i, j)
+                    
+                    
+                    
+                }
+            }
+
         }
     }
 }
+
 
 //Left click
 function cellClicked(elCell, i, j) {
@@ -194,21 +215,21 @@ function cellClicked(elCell, i, j) {
     if (clickCount === 1) {
         setMinesNegsCount(i, j)
         startTimer()
+        setNeighbors()
+
     }
     if (gGame.hintStatus) {
         hintRender(i, j)
         return
     }
+    
     if (cell.isMarked || cell.isShown) return
     cell.isShown = true
     if (cell.isShown && cell.isMine) {
         gGame.lives--
     }
-    if (!cell.isMine) {
-        mines = countMinesAround(gBoard, i, j)
-        cell.minesAroundCount = mines
-    }
-    if (cell.minesAroundCount === 0) {
+   
+    if (cell.minesAroundCount === 0 && !cell.isMine) {
         expandShown(gBoard, i, j)
     }
     renderBoard(gBoard)
@@ -249,7 +270,7 @@ function checkGameOver() {
         elGameOver.innerHTML = '<h2 style="color:brown">You Lost</h2>'
         elSmile.innerText = '😫'
         clearInterval(gIntervalID)
-       }
+    }
 
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard[0].length; j++) {
@@ -331,11 +352,11 @@ function resetTable() {
         hintStatus: false,
         manually: false
     }
-    gameOver=false
+    gameOver = false
     clearInterval(gIntervalID)
     clickCount = 0
     gStartTime = 0
-    manuallMinesSet =0
+    manuallMinesSet = 0
     var hint = document.querySelector('.game-hint')
     var elGameOver = document.querySelector('.game-over')
     var elBtn = document.querySelectorAll('button')
@@ -434,13 +455,13 @@ function hintRender(rowIdx, colIdx) {
 // manually button activate
 function manuallyPos() {
     var elManualBtn = document.querySelector('.manually')
-    if (gGame.isOn && gGame.manually === false && clickCount===0) {
-               gGame.isOn = false
+    if (gGame.isOn && gGame.manually === false && clickCount === 0) {
+        gGame.isOn = false
         gGame.manually = true
         elManualBtn.innerText = 'Set ' + gLevel.MINES + ' mines'
         elManualBtn.style.color = '#dbd24a'
-    } 
-    if (manuallMinesSet === gLevel.MINES){
+    }
+    if (manuallMinesSet === gLevel.MINES) {
         gGame.isOn = true
         for (var i = 0; i < gBoard.length; i++) {
             for (var j = 0; j < gBoard[0].length; j++) {
@@ -449,7 +470,7 @@ function manuallyPos() {
                 renderBoard(gBoard)
             }
         }
-              elManualBtn.classList.remove('set-play')
+        elManualBtn.classList.remove('set-play')
         elManualBtn.innerText = gLevel.MINES + ' Mines Activated'
         elManualBtn.style.color = '#dbd24a'
     }
@@ -458,9 +479,9 @@ function manuallyPos() {
 
 
 
-function checkBtn(){
+function checkBtn() {
     var elManualBtn = document.querySelector('.manually')
-    if(clickCount > 0){
+    if (clickCount > 0) {
         elManualBtn.innerText = 'Not Allowed'
     }
 }
