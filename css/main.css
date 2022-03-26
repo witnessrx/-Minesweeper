@@ -1,13 +1,21 @@
 *{
+    
     box-sizing: border-box;
 }
 body{
+    
     height: 100%;
 text-align: center;
 background-image: url('../img/1.jpg');
 background-repeat: no-repeat;
 background-size: cover;
 }
+
+h1{
+    font-family:Georgia, 'Times New Roman', Times, serif;
+color: #3b1753;
+}
+
 div{
     margin-top: 20px;
 }
@@ -97,6 +105,8 @@ color: rgb(5, 87, 55);
 
 .game-hint{
 background-color: rgb(211, 119, 14);
+width: 120px;
+
 }
 
 
@@ -115,4 +125,8 @@ background-color: rgb(243, 228, 23);
     background-color: #dbd24a;
     transform: scale(1.2);
     
+}
+
+.best-time{
+    color: brown;
 }

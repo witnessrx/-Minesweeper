@@ -303,7 +303,7 @@ function checkGameOver() {
 function bestTime() {
     var bestTime = document.querySelector('.best-time')
     if (localStorage.getItem('cuurTime') < bestTime.innerText) {
-        bestTime.innerText = 'Best Time: ' + localStorage.getItem('cuurTime')
+        bestTime.innerText =  localStorage.getItem('cuurTime')
     }
 }
 
@@ -312,7 +312,11 @@ function bestTime() {
 //stats update
 function renderStats() {
     var elLives = document.querySelector('.lives')
-    elLives.innerText = 'Lives: ' + gGame.lives
+    if(gGame.lives===3)elLives.innerText = 'Lives: ' + '💖 💖 💖'
+    if(gGame.lives===2)elLives.innerText = 'Lives: ' + '💖 💖 🤍'
+    if(gGame.lives===1)elLives.innerText = 'Lives: ' + '💔 🤍 🤍'
+    if(gGame.lives===0)elLives.innerText = 'Lives: ' + '🤍 🤍 🤍'
+    
     var elShownCount = document.querySelector('.count')
     elShownCount.innerText = 'Shown Count: ' + gGame.shownCount + '/' + `${gLevel.SIZE * gLevel.SIZE - gLevel.MINES}`
     var elMarkedCount = document.querySelector('.marked')
@@ -364,7 +368,7 @@ function resetTable() {
     for (var btn of elBtn)
         btn.style.color = '#e3e1f5'
     hint.classList.remove('activate-hint')
-    hint.innerText = 'Hint: ' + gGame.hint
+    hint.innerText = 'Hints: ' + "💡💡💡"
     elGameOver.innerText = ''
     var elSmile = document.querySelector('.smile')
     elSmile.innerText = '🙄'
@@ -413,6 +417,7 @@ function hintActivate() {
     var hint = document.querySelector('.game-hint')
     hint.classList.add('activate-hint')
     hint.innerText = '💡'
+    console.log(gGame.hint)
 }
 
 
@@ -420,8 +425,13 @@ function hintActivate() {
 //render hiden cells
 function hintRender(rowIdx, colIdx) {
     var hint = document.querySelector('.game-hint')
-    hint.innerText = 'Hint: ' + gGame.hint
-
+   
+    if(gGame.hint===2)  hint.innerText = 'Hints: ' + '💡💡'
+    if(gGame.hint===1)  hint.innerText = 'Hints: ' + '💡'
+    if(gGame.hint===0)  hint.innerText = 'No Hints'
+    hint.style.color =  '#1597cc'
+    console.log(gGame.hint)
+    
     var idxHint = []
     for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
         for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
@@ -437,7 +447,7 @@ function hintRender(rowIdx, colIdx) {
         }
     }
     renderBoard(gBoard)
-
+    
     setTimeout(() => {
         for (var i = 0; i < idxHint.length; i++) {
             gBoard[idxHint[i].i][idxHint[i].j].isShown = false
@@ -445,6 +455,7 @@ function hintRender(rowIdx, colIdx) {
         renderBoard(gBoard)
         gGame.hintStatus = false
         hint.classList.remove('activate-hint')
+        hint.style.color =  '#e3e1f5'
 
     }, 1000);
 }
@@ -485,3 +496,6 @@ function checkBtn() {
         elManualBtn.innerText = 'Not Allowed'
     }
 }
+
+
+
